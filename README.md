@@ -33,10 +33,10 @@ The algorithm developed for the Real-Time Emotion Detection achieved better resu
 
 ## How to use
 1. Download the [DEAP Dataset's](https://www.eecs.qmul.ac.uk/mmv/datasets/deap/download.html) preprocessed data in python format using the credentials provided by Queen Mary University of London. You should save these files under a folder named `datos` inside your workspace.
-2. Download the .yml file located in this GitHub, and follow the next steps to create an environment using this file.
-   a. Download NeuroEmociones.yml into your desired folder.
-   b. Follow the instructions in the file.
-   c. Activate the environment.
-4. Download CargarDatos.ipynb and Model.ipynb into your folder.
-5. Run CargarDatos.ipynb to preprocess all the .dat files into an easy to use numpy file. 
-6. Once CargarDatos.ipynb is done running, go ahead and create your own ML models, or run Model.ipynb to get several .pkl models to use on your projects. 
+2. Download the .yml file located in this Github, and follow the next steps to create an environment using this file.
+    a. Download NeuroEmociones.yml into your desired folder.
+    b. Using the Anaconda Prompt, change directory to the one where NeuroEmociones.yml is located using `cd (insert directory)`
+    c. Use the command `conda env create -f NeuroEmociones.yml` to create a new environment.
+5. Download CargarDatos.ipynb and Model.ipynb into your folder.
+6. Run CargarDatos.ipynb to preprocess all the .dat files into an easy to use numpy file. 
+7. Once CargarDatos.ipynb is done running, go ahead and create your own ML models, or run Model.ipynb to get several .pkl models to use on your projects. 
