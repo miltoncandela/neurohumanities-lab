@@ -17,8 +17,11 @@ If you find anything in the paper or repository useful, please consider citing:
 ```
 
 ## Versions
+- Python: 3.9.0
 - scikit-learn: 1.6.1
 - brainflow: 5.6.0
+- numpy: 1.23.5
+- pandas: 1.4.2
 
 ## Processing
 - 5-second windows PSD calculated by Welch, with 1-second windows and half a second overlap
