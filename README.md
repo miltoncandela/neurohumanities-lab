@@ -20,6 +20,12 @@ If you find anything in the paper or repository useful, please consider citing:
 - scikit-learn: 1.6.1
 - brainflow: 5.6.0
 
+## Processing
+- 5-second windows PSD calculated by Welch, with 1-second windows and half a second overlap
+- 85:15 training/testing inter-subject data division (1-27 training, and 28-32 testing) (missing cross-validation!)
+- normalization using z-score considering base line prior to PSD calculation
+- Prior to pre-processing DEAP dataset, they applied (1) bandpass frequency filter from 4.0-45.0 Hz, and (2) averaged to the common reference
+
 ## Overview
 Within the field of humanities, there is a recognized lack of educational innovation, as there are currently no reported tools available that enable individuals to interact with their environment to create an enhanced learning experience in the humanities. This project proposes a solution to address this gap by integrating technology and promoting the development of teaching methodologies in the humanities, specifically through the incorporation of emotional monitoring during the learning process. 
 
