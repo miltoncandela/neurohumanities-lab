@@ -18,6 +18,7 @@ If you find anything in the paper or repository useful, please consider citing:
 
 ## Versions
 - scikit-learn: 1.6.1
+- brainflow: 5.6.0
 
 ## Overview
 Within the field of humanities, there is a recognized lack of educational innovation, as there are currently no reported tools available that enable individuals to interact with their environment to create an enhanced learning experience in the humanities. This project proposes a solution to address this gap by integrating technology and promoting the development of teaching methodologies in the humanities, specifically through the incorporation of emotional monitoring during the learning process. 
