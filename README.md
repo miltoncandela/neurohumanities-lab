@@ -23,21 +23,21 @@ If you find anything in the paper or repository useful, please consider citing:
   DOI = {10.3389/fnhum.2024.1319574},
   journal = {Frontiers in Human Neuroscience},
   publisher = {Frontiers Media SA},
-  author = {Blanco-Ríos,  Miguel Alejandro and Candela-Leal,  Milton Osiel and Orozco-Romo,  Cecilia and Remis-Serna,  Paulina and Vélez-Saboyá,  Carol Stefany and Lozoya-Santos,  Jorge de Jesús and Cebral-Loureda,  Manuel and Ramírez-Moreno,  Mauricio Adolfo},
+  author = {Blanco-Ríos, Miguel Alejandro and Candela-Leal, Milton Osiel and Orozco-Romo, Cecilia and Remis-Serna, Paulina and Vélez-Saboyá, Carol Stefany and Lozoya-Santos, Jorge de Jesús and Cebral-Loureda, Manuel and Ramírez-Moreno, Mauricio Adolfo},
   year = {2024},
   month = mar 
 }
 
 Neurohumanities Lab enhances immersion and learning:
 @article{MelladoReyes2024,
-author = {Mellado-Reyes, Rebeca and Ortiz, Alexandro and Vélez-Saboyá, Carol S. and Lozoya-Santos, Jorge De-J. and Ramírez-Moreno, Mauricio A. and Cebral-Loureda, Manuel},
-title = {Neurohumanities Lab: Physiological Signal Analysis Within an Educational Partially Immersive Environment},
-journal = {Evolutionary studies in imaginative culture},
-volume = {8},
-number = {2},
-pages = {383--392},
-doi = {https://doi.org/10.70082/esiculture.vi.2312},
-year = {2024}
+  author = {Mellado-Reyes, Rebeca and Ortiz, Alexandro and Vélez-Saboyá, Carol S. and Lozoya-Santos, Jorge De-J. and Ramírez-Moreno, Mauricio A. and Cebral-Loureda, Manuel},
+  title = {Neurohumanities Lab: Physiological Signal Analysis Within an Educational Partially Immersive Environment},
+  journal = {Evolutionary studies in imaginative culture},
+  volume = {8},
+  number = {2},
+  pages = {383--392},
+  doi = {https://doi.org/10.70082/esiculture.vi.2312},
+  year = {2024}
 }
 
 8-Channel Neurohumanities Lab data paper:
