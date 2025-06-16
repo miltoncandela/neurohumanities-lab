@@ -8,8 +8,8 @@
 ## Processing
 - 5-second windows PSD calculated by Welch, with 1-second windows and half a second overlap
 - 85:15 training/testing inter-subject data division (1-27 training, and 28-32 testing) (missing cross-validation!)
-- normalization using z-score considering base line prior to PSD calculation
-- Prior to pre-processing DEAP dataset, they applied (1) bandpass frequency filter from 4.0-45.0 Hz, and (2) averaged to the common reference
+- PSD normalization using: x - mean(cal)/mean(cal), considering 3-second baseline prior to 60-second stimulation
+- Prior to pre-processing DEAP dataset, they applied (1) bandpass frequency filter from 4.0-45.0 Hz, and (2) averaged to the common reference (this needs to be replicated!)
 
 ## Citation
 If you find anything in the paper or repository useful, please consider citing:
