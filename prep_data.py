@@ -107,10 +107,10 @@ for subject in subjectList:
     with open(os.path.join(folder, f's{subject}.npy'), 'rb') as file:
         sub = np.load(file)
         # Iteramos sobre los datos procesados del sujeto
-        if int(subject) <= 30:
+        if int(subject) <= 29:
             data_training.append(sub[:, 0])
             label_training.append(sub[:, 1])
-        elif int(subject) > 30:
+        elif int(subject) > 29:
             data_testing.append(sub[:, 0])
             label_testing.append(sub[:, 1])
 

@@ -13,7 +13,7 @@ schan = ['Fp1', 'Fp2', 'C3', 'C4', 'P7', 'P8', 'O1', 'O2']
 bands = ['Delta', 'Theta', 'Alpha', 'Beta', 'Gamma', 'Eng', 'Fat', 'Exc', 'Rel']
 spec_chan = ['{}_{}'.format(c, s) for c in chan for s in bands]
 spec_schan = ['{}_{}'.format(c, s) for c in schan for s in bands]
-path_pross = 'other/pross/5s_norm/'
+path_pross = 'data/pross/3s_norm/'
 
 def conv_class(x):
     a = np.empty(x.shape, dtype='<U4')
