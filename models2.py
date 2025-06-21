@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import normalize, LabelEncoder
+from sklearn.preprocessing import normalize, LabelEncoder, StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.metrics import r2_score, mean_absolute_error, classification_report
@@ -34,7 +34,15 @@ with open(path_pross + 'label_training.npy', 'rb') as fileTrainL:
 
 def pross_X(x):
     # Select the 8 OpenBCI channels
-    return pd.DataFrame(x, columns=spec_chan)[spec_schan]
+    x = pd.DataFrame(x, columns=spec_chan)[spec_schan]
+    cols = x.columns
+    for i, col in enumerate(cols):
+        if col != cols[-1]:
+            x[col+'_D_'+cols[i+1]] = x[col]/x[cols[i+1]]
+        x[col+'_I'] = 1/x[col]
+        x[col + '_L'] = np.log(x[col] + 1)
+
+    return x
 
 
 # 12 PSD/video * 40 videos/subject * 27 subjects
@@ -44,6 +52,8 @@ def pross_X(x):
 X = np.vstack(X.reshape(-1))
 print(X.shape)
 X = pross_X(X)
+scaler = StandardScaler().fit(X)
+X = pd.DataFrame(scaler.transform(X))
 
 # Y = np.stack([np.stack(row) for row in Y]).reshape(-1, 4)
 Y = np.vstack(Y.reshape(-1)) - 1
@@ -51,8 +61,13 @@ print(Y.shape)
 # Z = np.ravel(Y[:, 1])
 Z = conv_class(Y)
 
+# mask = np.all(Y >= 6, axis=1)
+# X = X[mask]
+# Y = Y[mask]
+
 print(X)
-print(Z)
+print(Y)
+print(X.shape)
 
 # model = RandomForestClassifier(random_state=1, n_jobs=1).fit(X, Z[:, 0])
 # model.fit(X, Z[:, 0])
@@ -69,6 +84,7 @@ Dimp = RandomForestRegressor(random_state=100).fit(X, Domain_Train).feature_impo
 # Aimp = np.abs([pearsonr(X[col], Arousal_Train)[0] for col in X.columns])
 # Vimp = np.abs([pearsonr(X[col], Valence_Train)[0] for col in X.columns])
 # Dimp = np.abs([pearsonr(X[col], Domain_Train)[0] for col in X.columns])
+print(Aimp)
 
 tindices = np.argsort((Aimp + Vimp + Dimp)/3)[::-1]
 print(tindices)
@@ -86,12 +102,18 @@ with open(path_pross + 'label_testing.npy', 'rb') as fileTrainL:
 # M = np.stack([np.stack(row) for row in M]).reshape(-1, 288)
 M = np.vstack(M.reshape(-1))
 M = pross_X(M)
+M = pd.DataFrame(scaler.transform(M))
 # M = M.iloc[:, tindices]
 print(M.shape)
 
 # N = np.stack([np.stack(row) for row in N]).reshape(-1, 4)
 N = np.vstack(N.reshape(-1)) - 1
 L = np.ravel(N[:, 1])
+
+# mask = np.all(N >= 6, axis=1)
+# M = M[mask]
+# N = N[mask]
+# print(M.shape)
 
 Arousal_Test = np.ravel(N[:, 0])
 Valence_Test = np.ravel(N[:, 1])
@@ -103,9 +125,11 @@ def train_models(n):
     # tindices = np.argsort((Aimp + Vimp + Dimp) / 3)[::-1][:max_feat]
     # print(tindices[:n])
     # exit()
-    Val_R = RandomForestRegressor(random_state=1, max_depth=10).fit(X.iloc[:, tindices[:n]], Valence_Train)
-    Aro_R = RandomForestRegressor(random_state=1, max_depth=10).fit(X.iloc[:, tindices[:n]], Arousal_Train)
-    Dom_R = RandomForestRegressor(random_state=1, max_depth=10).fit(X.iloc[:, tindices[:n]], Domain_Train)
+    # model = LinearRegression()
+    model = RandomForestRegressor(random_state=1)
+    Val_R = model.fit(X.iloc[:, tindices[:n]], Valence_Train)
+    Aro_R = model.fit(X.iloc[:, tindices[:n]], Arousal_Train)
+    Dom_R = model.fit(X.iloc[:, tindices[:n]], Domain_Train)
 
     val_pred = Val_R.predict(M.iloc[:, tindices[:n]])
     aro_pred = Aro_R.predict(M.iloc[:, tindices[:n]])

@@ -65,9 +65,16 @@ def FFT_Processing(sub, channel, band, window_size, fs):
             start = fs*3-1
 
             # Baseline-normalized band power
-            cal_psd = np.zeros((len(channel), len(band)-1 + 4))
-            for j in range(len(channel)):
-                cal_psd[j] = add_index(psd=brainflow_bandpowers(data[j][:(fs*3)], fs, band))
+            # cal_psd_min, cal_psd_max = np.zeros((len(channel), len(band)-1 + 4)), np.zeros((len(channel), len(band)-1 + 4))
+            # cal_psd_mea, cal_psd_std = np.zeros((len(channel), len(band) - 1 + 4)), np.zeros((len(channel), len(band) - 1 + 4))
+            # for j in range(len(channel)):
+            #     a = np.zeros((3, len(band)-1 + 4))
+            #     for w in range(3):
+            #         a[w] = add_index(psd=brainflow_bandpowers(data[j][(fs*w):(fs*(w+1))], fs, band))
+            #     print(np.mean(a, axis=0))
+            #     print(add_index(psd=brainflow_bandpowers(data[j][:(fs*3)], fs, band)))
+            #     cal_psd_min[j], cal_psd_max[j] = np.min(a, axis=0), np.max(a, axis=0)
+            #     cal_psd_mea[j], cal_psd_std[j] = np.mean(a, axis=0), np.std(a, axis=0)
 
             while start + window_size < data.shape[1]:
                 meta_array, meta_data = [], []
@@ -80,8 +87,10 @@ def FFT_Processing(sub, channel, band, window_size, fs):
                     Y = add_index(psd=brainflow_bandpowers(X, fs, band))
 
                     # Normalization according to: (x - mean(cal))/mean(cal)
-                    for z in range(len(band)-1 + 4):
-                        Y[z] = (Y[z] - cal_psd[j, z])/cal_psd[j, z]
+                    # for z in range(len(band)-1 + 4):
+                    #     Y[z] = (Y[z] - cal_psd[j, z])/cal_psd[j, z]
+                    #     Y[z] = (Y[z] - cal_psd_min[j, z]) / (cal_psd_max[j, z] - cal_psd_min[j, z])
+                    #     Y[z] = (Y[z] - cal_psd_mea[j, z]) / cal_psd_std[j, z]
 
                     meta_data += Y
 
@@ -107,10 +116,10 @@ for subject in subjectList:
     with open(os.path.join(folder, f's{subject}.npy'), 'rb') as file:
         sub = np.load(file)
         # Iteramos sobre los datos procesados del sujeto
-        if int(subject) <= 29:
+        if int(subject) <= 25:
             data_training.append(sub[:, 0])
             label_training.append(sub[:, 1])
-        elif int(subject) > 29:
+        elif int(subject) > 25:
             data_testing.append(sub[:, 0])
             label_testing.append(sub[:, 1])
 
