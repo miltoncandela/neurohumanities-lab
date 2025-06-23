@@ -2,24 +2,25 @@ import numpy as np
 import pickle as pickle
 import os
 from brainflow.data_filter import DataFilter, WindowOperations
-import pyeeg as pe
+# import pyeeg as pe
 
 # Configuración para la función np.load para cargar archivos.
 # Los valores por defecto establecidos incluyen el uso de codificación ASCII.
 np.load.__defaults__=(None, True, True, 'ASCII')
 
-folder = 'data/pross/10s_norm'
+w = 20
+folder = 'data/pross/{}s_norm'.format(w)
 # Definición de los canales EEG que se desean utilizar (8 canales de openbci).
 channel = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
 
 # Frecuencias de las bandas para calcular el espectro de potencia (PSD) de la señal EEG.
 band = [.5,4,8,12,30,45]  # Definición de 5 bandas.
 
-# Tamaño de ventana para promediar la potencia en bandas durante 5 segundos (downsampleado a 128 Hz).
-window_size = 128 * 10  # Ventana de 5 segundos a una frecuencia de muestreo de 128 Hz.
-
 # Frecuencia de muestreo de la señal EEG.
 fs = 128  # Frecuencia de muestreo de 128 Hz.
+
+# Tamaño de ventana para promediar la potencia en bandas durante 5 segundos (downsampleado a 128 Hz).
+window_size = 128 * w  # Ventana de 5 segundos a una frecuencia de muestreo de 128 Hz.
 
 # Lista de sujetos para cargar los datos.
 subjectList = ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31','32']
@@ -51,11 +52,10 @@ def add_index(psd):
 
 # Definición de la función para procesar datos EEG
 def FFT_Processing(sub, channel, band, window_size, fs):
-    # Lista para almacenar metadatos
-    meta = []
 
     # Abrir los datos usando pickle para descomprimir
     with open('data/raw/s' + sub + '.dat', 'rb') as file:
+        meta = []
         subject = pickle.load(file, encoding='latin1')  # Resuelve el problema de datos de Python 2 utilizando la codificación latin1
 
         for i in range(0, 40):
@@ -84,7 +84,8 @@ def FFT_Processing(sub, channel, band, window_size, fs):
                     # meta_data = meta_data + list(Y[0])
                     # PyEEG: 524.5068,  3251.6598,  3527.7513, 10472.2545, 2828.3445
                     # Brainflow: 0.1634, 1.1050, 1.3249, 2.0719, 0.1612
-                    Y = add_index(psd=brainflow_bandpowers(X, fs, band))
+                    # Y = add_index(psd=brainflow_bandpowers(X, fs, band))
+                    Y = brainflow_bandpowers(X, fs, band)
 
                     # Normalization according to: (x - mean(cal))/mean(cal)
                     # for z in range(len(band)-1 + 4):
@@ -99,7 +100,14 @@ def FFT_Processing(sub, channel, band, window_size, fs):
 
                 meta.append(np.array(meta_array))
                 start += window_size
+
         meta = np.array(meta)
+        t = 60 // w
+        # Normalization according to z-score
+        for i_trial in range(meta.shape[0] // w):
+            a = meta[(i_trial*t):(i_trial+1)*t, 0]
+            for i in range(a.shape[0]):
+                meta[(i_trial * t)+i, 0] = (meta[(i_trial * t)+i, 0] - np.mean(a, axis=0)) / np.std(a, axis=0)
         np.save(folder + '/s' + sub, meta, allow_pickle=True, fix_imports=True)
 
 for subjects in subjectList:
@@ -116,10 +124,10 @@ for subject in subjectList:
     with open(os.path.join(folder, f's{subject}.npy'), 'rb') as file:
         sub = np.load(file)
         # Iteramos sobre los datos procesados del sujeto
-        if int(subject) <= 25:
+        if int(subject) <= 29:
             data_training.append(sub[:, 0])
             label_training.append(sub[:, 1])
-        elif int(subject) > 25:
+        elif int(subject) > 29:
             data_testing.append(sub[:, 0])
             label_testing.append(sub[:, 1])
 
