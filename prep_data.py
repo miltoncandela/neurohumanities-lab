@@ -8,8 +8,8 @@ from brainflow.data_filter import DataFilter, WindowOperations
 # Los valores por defecto establecidos incluyen el uso de codificación ASCII.
 np.load.__defaults__=(None, True, True, 'ASCII')
 
-w = 20
-folder = 'data/pross/{}s_norm'.format(w)
+w = 10
+folder = 'data/pross/{}s'.format(w)
 # Definición de los canales EEG que se desean utilizar (8 canales de openbci).
 channel = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32]
 
@@ -102,12 +102,12 @@ def FFT_Processing(sub, channel, band, window_size, fs):
                 start += window_size
 
         meta = np.array(meta)
-        t = 60 // w
+        # t = 60 // w
         # Normalization according to z-score
-        for i_trial in range(meta.shape[0] // w):
-            a = meta[(i_trial*t):(i_trial+1)*t, 0]
-            for i in range(a.shape[0]):
-                meta[(i_trial * t)+i, 0] = (meta[(i_trial * t)+i, 0] - np.mean(a, axis=0)) / np.std(a, axis=0)
+        # for i_trial in range(meta.shape[0] // w):
+        #     a = meta[(i_trial*t):(i_trial+1)*t, 0]
+        #     for i in range(a.shape[0]):
+        #         meta[(i_trial * t)+i, 0] = (meta[(i_trial * t)+i, 0] - np.mean(a, axis=0)) / np.std(a, axis=0)
         np.save(folder + '/s' + sub, meta, allow_pickle=True, fix_imports=True)
 
 for subjects in subjectList:

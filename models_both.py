@@ -2,13 +2,13 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import normalize, LabelEncoder, StandardScaler, RobustScaler
 from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, HistGradientBoostingRegressor
 from sklearn.metrics import r2_score, mean_absolute_error, classification_report, accuracy_score
 from pickle import dump
 from scipy.stats import pearsonr
 from copy import deepcopy
 
-# Previous versions: numpy 1.19.5, scipy 1.23.5
+# Previous versions: numpy 1.19.5, scipy 1.23.5, scikit-learn 0.24.1
 chan = ['Fp1', 'AF3', 'F3', 'F7', 'FC5', 'FC1', 'C3', 'T7',
         'CP5', 'CP1', 'P3', 'P7', 'PO3', 'O1', 'Oz', 'Pz',
         'Fp2', 'AF4', 'Fz', 'F4', 'F8', 'FC6', 'FC2', 'Cz',
@@ -19,7 +19,6 @@ spec_chan = ['{}_{}'.format(c, s) for c in chan for s in bands]
 spec_schan = ['{}_{}'.format(c, s) for c in schan for s in bands]
 path_pross = 'data/pross/10s_norm/'
 max_feat = 8
-
 
 def conv_class(x):
     a = np.empty(x.shape, dtype='<U4')
@@ -63,21 +62,18 @@ def feature_generation(df):
     # track the combinations of ith and jth features, and so not to generate duplicate features when multiplying
     # ith feature with jth feature and vice versa (as they are the same number).
     for i in range(len(df.columns)):
-        names.append(df.columns[i] + '-I')
-        df_features = pd.concat([df_features, np.divide(np.ones(df.shape[0]), df.loc[:, df.columns[i]])],
-                                axis=1, ignore_index=True)
+        # names.append(df.columns[i] + '-I')
+        # df_features = pd.concat([df_features, np.divide(np.ones(df.shape[0]), df.loc[:, df.columns[i]])], axis=1, ignore_index=True)
 
-        names.append(df.columns[i] + '-L')
-        df_features = pd.concat([df_features, pd.Series(np.log(np.abs(np.array(df.loc[:, df.columns[i]])) + 1))],
-                                axis=1, ignore_index=True)
+        # names.append(df.columns[i] + '-L')
+        # df_features = pd.concat([df_features, pd.Series(np.log(np.abs(np.array(df.loc[:, df.columns[i]])) + 1))], axis=1, ignore_index=True)
 
-        # for j in range(len(df.columns)):
-        #     if i != j:
-        #         names.append(df.columns[i] + '-D-' + df.columns[j])
-        #        df_features = pd.concat([df_features,
-        #                                 pd.Series(np.divide(df.loc[:, df.columns[i]],
-        #                                                     np.array(df.loc[:, df.columns[j]]) + eps))],
-        #                                 axis=1, ignore_index=True)
+        for j in range(len(df.columns)):
+            if i != j and (df.columns[i].split('_')[0] == df.columns[j].split('_')[0]):
+                a = np.array(df.loc[:, df.columns[i]])
+                b = np.array(df.loc[:, df.columns[j]] + eps)
+                names.append(df.columns[i] + '-D-' + df.columns[j])
+                df_features = pd.concat([df_features, pd.Series(np.divide(a, b))], axis=1, ignore_index=True)
         #         if [i, j] not in combinations and [j, i] not in combinations:
         #             combinations.append([i, j])
         #            combinations.append([j, i])
@@ -130,6 +126,7 @@ def pross_X(x):
     x = pd.DataFrame(x, columns=spec_chan)[spec_schan]
     # x = add_index(x)
     # x = feature_generation(x)
+    # x = x.drop(spec_schan, axis=1)
     return x
 
 
@@ -144,6 +141,8 @@ with open(path_pross + 'label_training.npy', 'rb') as fileTrainL:
 # X: (12960, 160) # 12960 PSDs from all subjects, 288: 32 channels * (5 frequency bands + 4 indices)
 X = np.vstack(X.reshape(-1))
 X = pross_X(X)
+# scaler = StandardScaler().fit(X)
+# X = pd.DataFrame(scaler.transform(X), columns=X.columns)
 
 Y = np.vstack(Y.reshape(-1))
 Z = conv_class(Y)
@@ -182,21 +181,39 @@ X_medD, Y_medD = X[mask], Y[mask]
 mask = Y[:, 2] > 6
 X_higD, Y_higD = X[mask], Y[mask]
 
+# Min-max normalization
+# Y = Y - 5
+
 # Training using categorical and regression features
 TRA_Cat, TRV_Cat, TRD_Cat = np.ravel(Z[:, 0]), np.ravel(Z[:, 1]), np.ravel(Z[:, 2])  # Training Arousal_Categorical
 TRA_Reg, TRV_Reg, TRD_Reg = np.ravel(Y[:, 0]), np.ravel(Y[:, 1]), np.ravel(Y[:, 2])  # Training Arousal_Regression
-s = pd.Series(data=0, index=X.columns).sort_values(ascending=True)
+sA = pd.Series(data=0, index=X.columns).sort_values(ascending=True)
+sV = pd.Series(data=0, index=X.columns).sort_values(ascending=True)
+sD = pd.Series(data=0, index=X.columns).sort_values(ascending=True)
 
-while len(s) > 15:
-    features = list(s.index)
-    Aimp = RandomForestRegressor(n_estimators=5, random_state=100).fit(X.loc[:, features], TRA_Reg).feature_importances_
-    Vimp = RandomForestRegressor(n_estimators=5, random_state=100).fit(X.loc[:, features], TRV_Reg).feature_importances_
-    Dimp = RandomForestRegressor(n_estimators=5, random_state=100).fit(X.loc[:, features], TRD_Reg).feature_importances_
+while len(sA) > 15:
+    featuresA, featuresV, featuresD = list(sA.index), list(sV.index), list(sD.index)
+    Aimp = RandomForestRegressor(n_estimators=5, max_depth=10, random_state=100).fit(X.loc[:, featuresA], TRA_Reg).feature_importances_
+    Vimp = RandomForestRegressor(n_estimators=5, max_depth=10, random_state=100).fit(X.loc[:, featuresV], TRV_Reg).feature_importances_
+    Dimp = RandomForestRegressor(n_estimators=5, max_depth=10, random_state=100).fit(X.loc[:, featuresD], TRD_Reg).feature_importances_
 
-    s = pd.Series(data=(Aimp + Vimp + Dimp) / 3, index=features).sort_values(ascending=False)
-    s = s.iloc[:-10]
-    print(s)
-features = list(s.index)
+    sA = pd.Series(data=Aimp, index=featuresA).sort_values(ascending=False)
+    sV = pd.Series(data=Vimp, index=featuresV).sort_values(ascending=False)
+    sD = pd.Series(data=Dimp, index=featuresD).sort_values(ascending=False)
+
+    sA, sV, sD = sA.iloc[:-10], sV.iloc[:-10], sD.iloc[:-10]
+    print(sA)
+featuresA, featuresV, featuresD = list(sA.index), list(sV.index), list(sD.index)
+print()
+print(sA)
+print(sV)
+print(sD)
+# Fp2_Theta    0.184031
+# P7_Theta     0.078534
+# C3_Gamma     0.070599
+# O1_Gamma     0.056738
+# O2_Gamma     0.051193
+# Fp1_Beta     0.044235
 
 with open(path_pross + 'data_testing.npy', 'rb') as fileTrain:
     M = np.load(fileTrain, allow_pickle=True)
@@ -206,12 +223,14 @@ with open(path_pross + 'label_testing.npy', 'rb') as fileTrainL:
 
 M = np.vstack(M.reshape(-1))
 M = pross_X(M)
-# M = pd.DataFrame(scaler.transform(M))
+# M = pd.DataFrame(scaler.transform(M), columns=M.columns)
 # M = M.iloc[:, tindices]
 print(M.shape)
 
 N = np.vstack(N.reshape(-1))
 L = conv_class(N)
+
+# N = N - 5
 
 # Testing Regression/Categorical data distribution
 TEA_Cat, TEV_Cat, TED_Cat = np.ravel(L[:, 0]), np.ravel(L[:, 1]), np.ravel(L[:, 2])
@@ -235,35 +254,51 @@ def calc_perf(true, mode, pred):
         print('Acc:', round(acc_val, 3), round(acc_aro, 3), round(acc_dom, 3))
 
 
+print(min(TRV_Reg), max(TRV_Reg), min(TRA_Reg), max(TRA_Reg), min(TRD_Reg), max(TRD_Reg))
+print(min(TEV_Reg), max(TEV_Reg), min(TEA_Reg), max(TEA_Reg), min(TED_Reg), max(TED_Reg))
+
+
 def train_models(n):
 
     print(n)
-    Val_C = RandomForestClassifier(n_estimators=5, max_depth=7, random_state=1).fit(X.loc[:, features[:n]], TRV_Cat)
-    Aro_C = RandomForestClassifier(n_estimators=5, max_depth=7, random_state=1).fit(X.loc[:, features[:n]], TRA_Cat)
-    Dom_C = RandomForestClassifier(n_estimators=5, max_depth=7, random_state=1).fit(X.loc[:, features[:n]], TRD_Cat)
+    Val_C = RandomForestClassifier(n_estimators=5, max_depth=7, random_state=1).fit(X.loc[:, featuresV[:n]], TRV_Cat)
+    Aro_C = RandomForestClassifier(n_estimators=5, max_depth=7, random_state=1).fit(X.loc[:, featuresA[:n]], TRA_Cat)
+    Dom_C = RandomForestClassifier(n_estimators=5, max_depth=7, random_state=1).fit(X.loc[:, featuresD[:n]], TRD_Cat)
 
-    predTA_val, predTA_aro = Val_C.predict(X.loc[:, features[:n]]), Aro_C.predict(X.loc[:, features[:n]])
-    predTA_dom = Dom_C.predict(X.loc[:, features[:n]])
+    predTA_val, predTA_aro = Val_C.predict(X.loc[:, featuresV[:n]]), Aro_C.predict(X.loc[:, featuresA[:n]])
+    predTA_dom = Dom_C.predict(X.loc[:, featuresD[:n]])
     print('Training ', end='')
     calc_perf([TRV_Cat, TRA_Cat, TRD_Cat], 'cat', [predTA_val, predTA_aro, predTA_dom])
 
-    predTE_val, predTE_aro = Val_C.predict(M.loc[:, features[:n]]), Aro_C.predict(M.loc[:, features[:n]])
-    predTE_dom = Dom_C.predict(M.loc[:, features[:n]])
+    predTE_val, predTE_aro = Val_C.predict(M.loc[:, featuresV[:n]]), Aro_C.predict(M.loc[:, featuresA[:n]])
+    predTE_dom = Dom_C.predict(M.loc[:, featuresD[:n]])
     print('Testing ', end='')
     calc_perf([TEV_Cat, TEA_Cat, TED_Cat], 'cat', [predTE_val, predTE_aro, predTE_dom])
 
     # Traditional Approach
-    Val_R = RandomForestRegressor(n_estimators=5, max_depth=6, random_state=1).fit(X.loc[:, features[:n]], TRV_Reg)
-    Aro_R = RandomForestRegressor(n_estimators=5, max_depth=6, random_state=1).fit(X.loc[:, features[:n]], TRA_Reg)
-    Dom_R = RandomForestRegressor(n_estimators=5, max_depth=6, random_state=1).fit(X.loc[:, features[:n]], TRD_Reg)
+    # Val_R = RandomForestRegressor(n_estimators=5, max_depth=6, criterion='absolute_error', random_state=1).fit(X.loc[:, features[:n]], TRV_Reg)
+    # Aro_R = RandomForestRegressor(n_estimators=5, max_depth=6, criterion='absolute_error', random_state=1).fit(X.loc[:, features[:n]], TRA_Reg)
+    # Dom_R = RandomForestRegressor(n_estimators=5, max_depth=6, criterion='absolute_error', random_state=1).fit(X.loc[:, features[:n]], TRD_Reg)
+
+    Val_R = HistGradientBoostingRegressor(max_depth=7, loss='quantile', quantile=0.5, random_state=1).fit(X.loc[:, featuresV[:n]], TRV_Reg)
+    Aro_R = HistGradientBoostingRegressor(max_depth=7, loss='quantile', quantile=0.5, random_state=1).fit(X.loc[:, featuresA[:n]], TRA_Reg)
+    Dom_R = HistGradientBoostingRegressor(max_depth=7, loss='quantile', quantile=0.5, random_state=1).fit(X.loc[:, featuresD[:n]], TRD_Reg)
 
     print('Training ', end='')
-    calc_perf([TRV_Reg, TRA_Reg, TRD_Reg], 'reg',
-              [Val_R.predict(X.loc[:, features[:n]]), Aro_R.predict(X.loc[:, features[:n]]), Dom_R.predict(X.loc[:, features[:n]])])
+    predTA_val, predTA_aro = Val_R.predict(X.loc[:, featuresV[:n]]), Aro_R.predict(X.loc[:, featuresA[:n]])
+    predTA_dom = Dom_R.predict(X.loc[:, featuresD[:n]])
+    calc_perf([TRV_Reg, TRA_Reg, TRD_Reg], 'reg', [predTA_val, predTA_aro, predTA_dom])
+
+    print(round(min(predTA_val), 2), round(max(predTA_val), 2), round(min(predTA_aro), 2), round(max(predTA_aro), 2),
+          round(min(predTA_dom), 2), round(max(predTA_dom), 2))
 
     print('Testing ', end='')
-    calc_perf([TEV_Reg, TEA_Reg, TED_Reg], 'reg',
-              [Val_R.predict(M.loc[:, features[:n]]), Aro_R.predict(M.loc[:, features[:n]]), Dom_R.predict(M.loc[:, features[:n]])])
+    predTE_val, predTE_aro = Val_R.predict(M.loc[:, featuresV[:n]]), Aro_R.predict(M.loc[:, featuresA[:n]])
+    predTE_dom = Dom_R.predict(M.loc[:, featuresD[:n]])
+    calc_perf([TEV_Reg, TEA_Reg, TED_Reg], 'reg', [predTE_val, predTE_aro, predTE_dom])
+
+    print(round(min(predTE_val), 2), round(max(predTE_val), 2), round(min(predTE_aro), 2), round(max(predTE_aro), 2),
+          round(min(predTE_dom), 2), round(max(predTE_dom), 2))
 
     # Classif + Regression (Work in Progress)
     '''

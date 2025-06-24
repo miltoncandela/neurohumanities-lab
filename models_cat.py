@@ -135,7 +135,7 @@ def pross_X(x):
     # Select the 8 OpenBCI channels
     x = pd.DataFrame(x, columns=spec_chan)[spec_schan]
     x = add_index(x)
-    x = feature_generation(x)
+    # x = feature_generation(x)
     # cols = x.columns
     # for i, col in enumerate(cols):
     #     if col != cols[-1]:
@@ -240,10 +240,9 @@ def train_models(n):
     # print(tindices[:n])
     # exit()
     # model = LinearRegression()
-    model = RandomForestClassifier(n_estimators=10, random_state=1)
-    Val_R = model.fit(X.iloc[:, tindices[:n]], Valence_Train)
-    Aro_R = model.fit(X.iloc[:, tindices[:n]], Arousal_Train)
-    Dom_R = model.fit(X.iloc[:, tindices[:n]], Domain_Train)
+    Val_R = RandomForestClassifier(n_estimators=10, random_state=1).fit(X.iloc[:, tindices[:n]], Valence_Train)
+    Aro_R = RandomForestClassifier(n_estimators=10, random_state=1).fit(X.iloc[:, tindices[:n]], Arousal_Train)
+    Dom_R = RandomForestClassifier(n_estimators=10, random_state=1).fit(X.iloc[:, tindices[:n]], Domain_Train)
 
     val_pred = Val_R.predict(M.iloc[:, tindices[:n]])
     aro_pred = Aro_R.predict(M.iloc[:, tindices[:n]])
