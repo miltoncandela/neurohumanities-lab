@@ -8,3 +8,6 @@
 /other/pyeeg
 /spheric/
 vad_prediction.ipynb
+/OfflineProcessing/RawData
+*.pkl
+.venv

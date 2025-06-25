@@ -1,0 +1,4 @@
+Each scene folder contains data from a specific scene, normalized with baseline data.
+Inside each scene folder there are two sub-folders: models_option_1 and models_option_2. The former contains data that was generated using 
+the following regression models: 4 fueture valence, 3 feature araousal and 3 feature dominance. The latter contains data that was generated using: 
+4 feature valence, 4 feature araousal and 3 feature dominance.

@@ -1,0 +1,11 @@
+pandas
+numpy
+matplotlib
+brainflow
+scipy
+pylsl
+colorama
+python-osc
+scikit-learn==1.3.1
+heartpy
+neurokit2
