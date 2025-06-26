@@ -387,12 +387,20 @@ def train_models(n):
 
     print()
 
-    if n == 5:
-        with open('models/reg_val_model2_10s.pkl', 'wb') as file:
+    # if n == 5:
+    #     with open('models/reg_val_model2_10s.pkl', 'wb') as file:
+    #         dump(Val_R, file)
+    #     with open('models/reg_aro_model2_10s.pkl', 'wb') as file:
+    #         dump(Aro_R, file)
+    #     with open('models/reg_dom_model2_10s.pkl', 'wb') as file:
+    #         dump(Dom_R, file)
+
+    if n == 4:
+        with open(rf'OfflineProcessing/Models/reg_val_model2_10s_{n}f.pkl', 'wb') as file:
             dump(Val_R, file)
-        with open('models/reg_aro_model2_10s.pkl', 'wb') as file:
+        with open(rf'OfflineProcessing/Models/reg_aro_model2_10s_{n}f.pkl', 'wb') as file:
             dump(Aro_R, file)
-        with open('models/reg_dom_model2_10s.pkl', 'wb') as file:
+        with open(rf'OfflineProcessing/Models/reg_dom_model2_10s_{n}f.pkl', 'wb') as file:
             dump(Dom_R, file)
 
 for n_feat in range(1, max_feat):
