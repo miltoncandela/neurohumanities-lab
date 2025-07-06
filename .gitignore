@@ -9,5 +9,9 @@
 /spheric/
 vad_prediction.ipynb
 /OfflineProcessing/RawData
+/OfflineProcessing/testing
+/OfflineProcessing/Models
+/OnlineProcessing
+/OnlineProcessing/EEG/Models
 *.pkl
 .venv
