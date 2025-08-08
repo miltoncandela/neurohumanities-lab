@@ -9,3 +9,4 @@ python-osc
 scikit-learn==1.6.1
 heartpy
 neurokit2
+statsmodels==0.14.4
