@@ -14,7 +14,7 @@ chan = ['Fp1', 'AF3', 'F3', 'F7', 'FC5', 'FC1', 'C3', 'T7',
         'Fp2', 'AF4', 'Fz', 'F4', 'F8', 'FC6', 'FC2', 'Cz',
         'C4', 'T8', 'CP6', 'CP2', 'P4', 'P8', 'PO4', 'O2']
 schan = ['Fp1', 'Fp2', 'C3', 'C4', 'P7', 'P8', 'O1', 'O2']
-bands = ['Delta', 'Theta', 'Alpha', 'Beta', 'Gamma'] #, 'Eng', 'Fat', 'Exc', 'Rel']
+bands = ['Delta', 'Theta', 'Alpha', 'Beta', 'Gamma', 'Eng', 'Fat', 'Exc', 'Rel']
 spec_chan = ['{}_{}'.format(c, s) for c in chan for s in bands]
 spec_schan = ['{}_{}'.format(c, s) for c in schan for s in bands]
 path_pross = 'data/pross/10s_norm/'
@@ -395,12 +395,14 @@ def train_models(n):
     #     with open('models/reg_dom_model2_10s.pkl', 'wb') as file:
     #         dump(Dom_R, file)
 
-    if n == 4:
-        with open(rf'OfflineProcessing/Models/reg_val_model2_10s_{n}f.pkl', 'wb') as file:
+    if n in [3,4]: # [3, 4]:
+        print(n)
+        print(featuresV, featuresA, featuresD)
+        with open(rf'OnlineProcessing/Models/reg_val_model2_10s_{n}f.pkl', 'wb') as file:
             dump(Val_R, file)
-        with open(rf'OfflineProcessing/Models/reg_aro_model2_10s_{n}f.pkl', 'wb') as file:
+        with open(rf'OnlineProcessing/Models/reg_aro_model2_10s_{n}f.pkl', 'wb') as file:
             dump(Aro_R, file)
-        with open(rf'OfflineProcessing/Models/reg_dom_model2_10s_{n}f.pkl', 'wb') as file:
+        with open(rf'OnlineProcessing/Models/reg_dom_model2_10s_{n}f.pkl', 'wb') as file:
             dump(Dom_R, file)
 
 for n_feat in range(1, max_feat):
