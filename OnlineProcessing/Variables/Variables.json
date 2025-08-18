@@ -1,8 +1,8 @@
 {
-    "ip": "192.168.0.158",
+    "ip": "192.168.0.108", 
     "ports": {
         "port1": {
-            "value": 9000,
+            "value": 7000,
             "description": "Engament touch designer"
         },
         "port2": {
@@ -10,7 +10,7 @@
             "description": "Engament pure data"
         },
         "port3": {
-            "value": 7000,
+            "value": 9000,
             "description": "Emocion touch deisgner"
         },
         "port4": {
@@ -31,13 +31,13 @@
     },
     "test_parms": {
         "arduino_bol": false,
-        "synthetic_bol": true,
+        "synthetic_bol": false,
         "linear_bol": false,
-        "final_descion": 1,
-        "duration": 120,
+        "final_descion": 0,
+        "duration": 10,
         "sampling_rate": 250,
         "arduino_com": "COM5",
-        "open_bci_com": "3",
+        "open_bci_com": "13",
         "evaluation_type": "spherical"
     }
 }

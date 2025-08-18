@@ -46,7 +46,7 @@ def add_index(psd):
     psd.append(psd[3]/(psd[2]+psd[1]))  # Engagement (beta/(alpha+theta))
     psd.append(psd[2]/psd[1])           # Fatigue (alpha/theta)
     psd.append(psd[3]/psd[2])           # Excitement (beta/alpha)
-    psd.append(psd[1]/psd[0])           # Relaxation (theta/delta)
+    psd.append(psd[1]/psd[0])           # Relaxation (theta/delta)open
     return psd
 
 

@@ -1,12 +1,12 @@
 import pandas as pd
 from brainflow import BoardShim, BrainFlowInputParams, LogLevels, BoardIds
-from brainflow.data_filter import DataFilter, WindowOperations
+from brainflow.data_filter import DataFilter #, WindowOperations
 import time
-from scipy import signal
+# from scipy import signal
 import numpy as np
 from scipy.signal import welch, butter, lfilter
 import pickle
-import pyeeg as pe
+# import pyeeg as pe
 from statistics import mean
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -18,7 +18,7 @@ import datetime
 import os
 from colorama import Fore, Style
 import json
-from serial import Serial
+# from serial import Serial
 from pathlib import Path
 import datetime
 import cProfile
@@ -45,9 +45,9 @@ evaluation_type = variables['test_parms'].get('evaluation_type', 'both')
 
 try:
     if evaluation_type == 'spherical' or evaluation_type == 'both':
-        Val_Pkl_linear = pickle.load(open(base_path /"reg_val_model2_10s_4f.pkl", "rb"))
-        Aro_Pkl_linear = pickle.load(open(base_path/"reg_aro_model2_10s_4f.pkl", "rb"))
-        Dom_Pkl_linear = pickle.load(open(base_path/"reg_dom_model2_10s_3f.pkl", "rb"))
+        Val_Pkl_linear = pickle.load(open(base_path /"Models/reg_val_model2_10s_4f.pkl", "rb"))
+        Aro_Pkl_linear = pickle.load(open(base_path/"Models/reg_aro_model2_10s_4f.pkl", "rb"))
+        Dom_Pkl_linear = pickle.load(open(base_path/"Models/reg_dom_model2_10s_3f.pkl", "rb"))
 
     # Unneeded
     # if evaluation_type == 'cubic' or evaluation_type == 'both': 
@@ -113,7 +113,7 @@ channels = list(range(9))   # Streaming data from channels 0 to 7\n",
 #Path para dicionarios de emociones
 emotions_path=base_path/'Emotions'/"emociones.json"
 fear_path=base_path/"Emotions"/"fear.json"
-Descartes_Passions_path=base_path/"Emotions"/"descartes.json"
+Descartes_Passions_path=base_path/"Emotions"/"descartes_UH.json"
 
 
 
@@ -131,7 +131,7 @@ def brainflow_bandpowers(sig, fs, nfft):
         nfft=nfft,
         overlap=nfft // 2,
         sampling_rate=fs,
-        window=WindowOperations.BLACKMAN_HARRIS,
+        window=3,
     )
 
     band_powers = []
@@ -197,7 +197,7 @@ sphere_vector = None
 def map_value(val):
     return (2) * (val - 1) / (8) - 1
 
-def get_emotion_sphere(value):
+def get_emotion_sphere(value, rank=0):
     """
     Identify the closet matching emotion vector to the given input.
 
@@ -222,6 +222,7 @@ def get_emotion_sphere(value):
 
     # Initialize a temporary variable to store the highest similarity score found.
     temp = 0
+    l = []
 
     # Iterate over each emotion and its normalized vector in DP_NORM.
     for emotion, vec in DP_NORM.items():
@@ -229,10 +230,17 @@ def get_emotion_sphere(value):
         # Calculate the cosine similarity between random_emotion and the current emotion vector.
         # Adding 1 and dividing by 2 scales the similarity from [-1, 1] to [0, 1].
         dot = (np.dot(random_emotion, vec) + 1) / 2
+        l.append(dot)
 
         # Update temp and final_emotion if the current similarity score is the highest encountered.
-        if dot > temp:
-            temp, final_emotion = dot, emotion
+        # if dot > temp:
+        #     temp, final_emotion = dot, emotion
+
+    s = pd.Series(dict(zip(DP_NORM.keys(), l))).sort_values(ascending=False)
+    if rank == 2:
+        print(s)
+
+    temp, final_emotion = s.index[rank], s[rank]
 
     # Return the final emotion label with the highest similarity score, the score itself,
     # and the normalized random_emotion vector.
@@ -323,7 +331,7 @@ def real_emotion(emo):
 
 def setup_arduino():
     arduino_com=variables['test_parms']['arduino_com']
-    arduino = Serial(port='COM' + arduino_com, baudrate=115200, timeout=.1)
+    # arduino = Serial(port='COM' + arduino_com, baudrate=115200, timeout=.1)
     print(f"Arduino connected on COM{arduino_com}.")
 
     def write_read(x, y, z):
@@ -410,6 +418,7 @@ try:
     # df for accumulation of reference data is created. To be used in normalization.
     df_pred_accumulated = pd.DataFrame()
     df_pred_timestamps = []
+    df_pred_acc = pd.DataFrame()
 
     # How much data (in time) is stored inside of the accumulation dataframe
     ref_duration = 60  # segundos
@@ -437,13 +446,12 @@ try:
             np_time = np.array(samples[timestamp_channel])
             np_time = np_time - 21600 # time zone converter to GMT-6
             np_df = pd.DataFrame(np_time)
-            df_time = df_time.append(np_df)
+            df_time = pd.concat([df_time, np_df], axis=0) #.append(np_df)
 
             ## ACCELERATION ##
 
             for i, channel in enumerate(acc_channel):
                 channel_data_acc[i].extend(samples[channel])
-
 
             # Sleep for a small interval to avoid high CPU usage
             time.sleep(1)
@@ -493,8 +501,8 @@ try:
 
             # Add the PSD values to the DataFrame
             psd_df = pd.concat([psd_df, pd.DataFrame([psd_bands])], ignore_index=True)
-
-
+        
+        psd_df.columns = ['Delta', 'Theta', 'Alpha', 'Beta', 'Gamma']
         df_t = psd_df.transpose()
         df_t.columns = ['Fp1', 'Fp2', 'C3', 'C4', 'P7', 'P8', 'O1', 'O2']
 
@@ -506,8 +514,10 @@ try:
         # Convert channel numbers to strings
         melted_df['channel'] = melted_df['channel'].astype(str)
 
+        # print(melted_df)
+
         # Create a new 'channel_band' column by combining 'channel' and 'index' columns
-        melted_df['channel_band'] = melted_df['channel'] + '_' + melted_df['index']
+        melted_df['channel_band'] = melted_df['channel'].astype(str) + '_' + melted_df['index'].astype(str)
 
         # Pivot the DataFrame to get the desired format
         new_df = melted_df.pivot(index='index', columns='channel_band', values='value')
@@ -546,9 +556,21 @@ try:
         for channel in CANALES:
             df_pred[f'{channel}_Relaxation'] = df_pred[f'{channel}_Theta'] / df_pred[f'{channel}_Delta']
 
+        print(df_pred)
+
+        df_pred_acc = pd.concat([df_pred_acc, df_pred], axis=0)
+        if df_pred_acc.shape[0] > 6:
+            df_pred_acc = df_pred_acc.iloc[1:]
+        ref_mean = 0 if df_pred_acc.shape[0] == 1 else df_pred_acc.median(axis=0)
+        ref_std = 1 if df_pred_acc.shape[0] == 1 else df_pred_acc.std(axis=0)
+        df_pred = (df_pred - ref_mean)/ref_std
+        print(df_pred_acc)
+
+        print(df_pred)
         
         # Data is stored in accumulative (reference) dataframe, when enough time has passed, this data is used for normalization, 
         # while dynamically updating with each iteration (similar to a sliding window)
+        '''
         if (time.time() - start_time) < ref_duration:
             df_pred_accumulated = pd.concat([df_pred_accumulated, df_pred], ignore_index=True)
         elif (time.time() - start_time) >= ref_duration:
@@ -557,13 +579,31 @@ try:
             ref_std = df_pred_accumulated.std()
             df_pred = (df_pred - ref_mean) / ref_std
             df_pred_accumulated = df_pred_accumulated.iloc[1:].reset_index(drop=True)
+        '''
+
+        #ref_mean = df_pred.mean()
+        #ref_std = df_pred.std()
+        #df_pred = (df_pred - ref_mean) / ref_std
+
         
         vale, arou, domin, domi = 0, 0, 0, 0
         iteraciones += 1
 
-        valinput = df_pred[['P7_Theta','C3_Gamma','O2_Gamma', 'P8_Beta']]
-        aroinput = df_pred[['Fp2_Theta','C3_Gamma','O1_Gamma','O2_Gamma']]
-        dominput = df_pred[['P7_Theta','Fp1_Gamma','O1_Beta']]
+        # Previously
+        # valinput = df_pred[['P7_Theta', 'P8_Beta', 'C3_Gamma','O2_Gamma']]
+        # aroinput = df_pred[['Fp2_Theta','C3_Gamma','O1_Gamma','O2_Gamma']]
+        # dominput = df_pred[['P7_Theta','O1_Beta','Fp1_Gamma']]
+
+        # 10s
+        # valinput = df_pred[['C4_Beta', 'Fp2_Theta', 'C3_Gamma','P8_Beta']]
+        # aroinput = df_pred[['C3_Gamma','C4_Gamma', 'O1_Gamma','Fp2_Gamma']]
+        # dominput = df_pred[['P8_Alpha','C3_Gamma','O1_Gamma']]
+
+        # 10s_norm
+        valinput = df_pred[['C3_Beta', 'C4_Gamma', 'O2_Gamma', 'Fp1_Beta']]
+        aroinput = df_pred[['C3_Gamma', 'Fp2_Gamma', 'O1_Gamma', 'O2_Gamma']]
+        dominput = df_pred[['Fp2_Beta', 'Fp1_Gamma', 'C3_Gamma']]
+
 
         if evaluation_type == 'cubic':
             # Regression models implementation
@@ -583,9 +623,9 @@ try:
 
 
         elif evaluation_type == 'spherical':
-            valen_linear = Val_Pkl_linear.predict(df_pred)
-            arous_linear = Aro_Pkl_linear.predict(df_pred)
-            domin_linear = Dom_Pkl_linear.predict(df_pred)
+            valen_linear = Val_Pkl_linear.predict(valinput)
+            arous_linear = Aro_Pkl_linear.predict(aroinput)
+            domin_linear = Dom_Pkl_linear.predict(dominput)
             vale_linear = mean(valen_linear)
             arou_linear = mean(arous_linear)
             domi_linear = mean(domin_linear)
@@ -637,6 +677,7 @@ try:
         ##engagement = ((engag_fp1+engag_fp2+engag_c3+engag_c4+engag_p7+engag_p8+engag_o1+engag_o2)/8)
         engagement = ((engag_fp1+engag_fp2)/2)
         engag = escalado_11(engagement)
+        # print(engag, end=' ')
 
         #engag = math.log((engag_fp1+engag_fp2)/2) #se agregó el logaritmo
         #engag = engag/2                           #se divide sobre 2 (rangos aprox de -2 a 2), con los IF, se limita a -1 y 1
@@ -646,8 +687,9 @@ try:
         #    engag = 1
 
         ## LINEAS ANTERIORES -  CAMBIARON EL 25 DE AGOSTO DE 2023 ##
-        #engag = ((engag_fp1+engag_fp2)/2*10) #se agregó una multiplicación
-        #engag = escalado_11(engag)
+        # engag = ((engag_fp1+engag_fp2)/2*10) #se agregó una multiplicación
+        # engag = escalado_11(engag)
+         #print(engag)
 
         #Definicion de cuales funciones se mandan a llamar en base al modelo linear o cubico
 
@@ -682,7 +724,12 @@ try:
             # Predicción de emociones esféricas
             if final_descion in [0, 2]:
                 try:
-                    spherical_emotion, temp, sphere_vector = get_emotion_sphere(detected_values)
+                    # spherical_emotion, temp, sphere_vector = get_emotion_sphere(detected_values)
+                    lemo = []
+                    for r in range(3):
+                        spherical_emotion, temp, _ = get_emotion_sphere(detected_values, rank=r)
+                        lemo.append(spherical_emotion)
+                        lemo.append(temp)
                 except Exception as e:
                     print(f"Error en la predicción esférica: {e}")
 
@@ -706,7 +753,8 @@ try:
 
             # Mostrar resultados de predicciones
             if final_descion == 0:
-                print(f"Spher Emotion: {spherical_emotion} {temp * 100:.2f}%")
+                pass
+                # print(f"Spher Emotion: {spherical_emotion} {temp * 100:.2f}%")
             elif final_descion == 1:
                 print(f"Spher Fear: {fear_label} {fear_metric * 100:.2f}%")
             elif final_descion == 2:
@@ -737,19 +785,28 @@ try:
 
         # Engagement (nivel de compromiso)
         client1.send_message(address_engagement, engag)
-        client2.send_message(address_engagement, engag)
+        # client2.send_message(address_engagement, engag)
 
-        client3.send_message(address_emotion, spherical_emotion)
-        client3.send_message(address_emotion_id, realemotion)
+        print(engag, lemo)
+        client3.send_message('/emo1', lemo[0])
+        client3.send_message('/emo1P', lemo[1])
+        client3.send_message('/emo2', lemo[2])
+        client3.send_message('/emo2P', lemo[3])
+        client3.send_message('/emo3', lemo[4])
+        client3.send_message('/emo3P', lemo[5])
 
-        client4.send_message(address_emotion, spherical_emotion)
-        client4.send_message(address_emotion_id, realemotion)
+        # client3.send_message(address_emotion, spherical_emotion)
+        # client3.send_message(address_emotion_id, realemotion)
 
-        client5.send_message(address_emotion, spherical_emotion)
-        client5.send_message(address_emotion_id, realemotion)
+        # client4.send_message(address_emotion, spherical_emotion)
+        # client4.send_message(address_emotion_id, realemotion)
+
+        # client5.send_message(address_emotion, spherical_emotion)
+        # client5.send_message(address_emotion_id, realemotion)
 
         if evaluation_type in ['spherical', 'both']:
-            send_scaled_metric(client5, address_similarity, temp)
+            pass
+            # send_scaled_metric(client5, address_similarity, temp)
         if final_descion in [1, 2]:
             send_scaled_metric(client5, address_similarity, fear_metric)
 
@@ -764,7 +821,8 @@ try:
 
         df_emotions.style.format("{:.2f}")
         #print(emociones) #descomentar
-        print(f"Engagement:{engag*100:.2f}%") #descomentar
+        print(f"Engagement:{(engag/2 + 0.5)*100:.2f}%") #descomentar
+        # escalado_11 = lambda x: (x - 0.5)*2 
         df_fear.style.format("{:.2f}")
         print("")
         # print(fear_cal)
@@ -871,8 +929,8 @@ except KeyboardInterrupt:
     board.stop_stream()
     board.release_session()
 
-except Exception as e:
-    print(Fore.RED + f"Error while processing data: {e}" + Style.RESET_ALL)
+#except Exception as e:
+#    print(Fore.RED + f"Error while processing data: {e}" + Style.RESET_ALL)
 
 finally:
     # Detener la sesión de la placa
