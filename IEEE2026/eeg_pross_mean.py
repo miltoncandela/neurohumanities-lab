@@ -105,7 +105,7 @@ def calc_bands2(s, band, seconds):
 
 
 
-norm_metric('PSD_TAB', 'PSD_TAB_calib')
+# norm_metric('PSD_TAB', 'PSD_TAB_calib')
 
 # freq_bands = {'Theta': [4, 8], 'AlphaL': [8, 10], 'AlphaH': [10, 12], 'Alpha': [8, 12],
 #                                 'BetaL': [12, 20], 'BetaH': [20, 30], 'Beta': [12, 30]}
