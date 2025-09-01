@@ -2,10 +2,8 @@ import os
 import pandas as pd
 from brainflow.data_filter import DataFilter
 import numpy as np
-from copy import deepcopy
 from scipy.signal import welch
 from scipy.integrate import simps
-from statistics import median, mean, stdev
 from scipy import stats
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import warnings
@@ -89,11 +87,11 @@ def calc_bands2(s, band, seconds):
         return power
 
     # Calculate the number of windows
-    window_size = seconds * sampling_rate  # 4 seconds * sampling rate
+    window_size = seconds * sampling_rate  # 2 seconds * sampling rate
     num_windows = len(s) // window_size
 
     a = []
-    # Iterate over 4-second windows and calculate PSD and Band Power
+    # Iterate over 2-second windows and calculate PSD and Band Power
     for i in range(num_windows):
         start_index = i * window_size
         end_index = start_index + window_size
@@ -113,14 +111,15 @@ def calc_bands2(s, band, seconds):
 
 for outlier_method in ['quantile', 'zscore']:
     for norm_method in ['minmax', 'zscore']:
+        # pass
         norm_metric('PSD_TAB', 'PSD_TAB_calib', outlier_method, norm_method)
 
 # freq_bands = {'Theta': [4, 8], 'AlphaL': [8, 10], 'AlphaH': [10, 12], 'Alpha': [8, 12],
 #                                 'BetaL': [12, 20], 'BetaH': [20, 30], 'Beta': [12, 30]}
 freq_bands = {'Theta': [4, 8], 'Alpha': [8, 12], 'Beta': [12, 30]}
-channels = ['FP1', 'FP2', 'C3', 'C4', 'T5', 'T6', 'O1', 'O2']
+channels = ['FP1', 'FP2', 'C3', 'C4', 'P7', 'P8', 'O1', 'O2']
 # samples = 250*60*4  # Removing the last 1 minute of the take
-centralp = 'C:/Users/Milton/PycharmProjects/neurohumanities-lab/IEEE2026/data/csv_ICA'
+centralp = 'C:/Users/Milton/PycharmProjects/neurohumanities-lab/IEEE2026/data/csv'
 fs = 250
 
 channels_bands = ['{}_{}'.format(channel, band) for channel in channels for band in freq_bands.keys()]
@@ -146,4 +145,4 @@ for file in os.listdir(centralp): # used_children: #   #   # os.listdir('data/EE
     print()
 
 print(df_PSD)
-df_PSD.reset_index(drop=True).to_csv('pross/PSD_TAB_ICA.csv')
+df_PSD.reset_index(drop=True).to_csv('pross/PSD_TAB.csv')
