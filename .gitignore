@@ -1,8 +1,8 @@
 /data/pross/other/
 /data/raw/
-/Frontiers2024/results/df_gamma.csv
-/Frontiers2024/results/df_PCA.csv
-/IFE2025/
+/2024_Frontiers/results/df_gamma.csv
+/2024_Frontiers/results/df_PCA.csv
+/2026_EDUCON/
 /models/
 /other/
 /other/pyeeg
