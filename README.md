@@ -16,12 +16,14 @@ If you find anything useful in the journal article or repository, please conside
 }
 ```
 
-> Blanco-Rios MA, Candela-Leal MO, Orozco-Romo C, Remis-Serna P, Velez-Saboya CS, Lozoya-Santos JJ, Cebral-Loureda M, & Ramirez-Moreno MA (2024)
-> **Real-time EEG-based Emotion Recognition for Neurohumanities: Perspectives from Principal Component Analysis and Tree-based Algorithms**
+> Blanco-Rios MA, Candela-Leal MO, Orozco-Romo C, Remis-Serna P, Velez-Saboya CS, Lozoya-Santos JJ, Cebral-Loureda M, & Ramirez-Moreno MA (2024)<br>
+> **Real-time EEG-based Emotion Recognition for Neurohumanities: Perspectives from Principal Component Analysis and Tree-based Algorithms**<br>
 > Frontiers in Human Neuroscience, 18, 1319574. https://doi.org/10.3389/fnhum.2024.1319574
 
 ## Data
-Raw data for `2026_EDUCON` and `2026_Elsevier` is available upon reasonable request.
+Raw data for `2026_EDUCON` or `2026_Elsevier` is available upon reasonable request.
+
+---
 
 ### Requirements
 - Python: 3.9.0
