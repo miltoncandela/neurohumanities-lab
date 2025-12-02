@@ -132,7 +132,8 @@ def dim_reduction(df, freq_bands, channel_groups):
     # df['Excitement'] = np.mean(np.divide(subb, suba), axis=1)
 
     df['Engagement'] = np.divide(subb, np.sum([subt, suba], axis=0))
-    df['Fatigue'] = np.divide(suba, subt)
+    # df['Fatigue'] = np.divide(suba, subt)
+    df['Fatigue'] = np.divide(subt, suba)
     df['Excitement'] = np.divide(subb, suba)
 
     return df
@@ -141,7 +142,7 @@ def dim_reduction(df, freq_bands, channel_groups):
 for outlier_method in ['quantile', 'zscore']:
     for norm_method in ['minmax', 'zscore']:
         # pass
-        norm_metric('PSD_TAB', 'PSD_TAB_calib', outlier_method, norm_method)
+        norm_metric('PSD_TABC', 'PSD_TABC_calib', outlier_method, norm_method)
 
 # freq_bands = {'Theta': [4, 8], 'AlphaL': [8, 10], 'AlphaH': [10, 12], 'Alpha': [8, 12],
 #                                 'BetaL': [12, 20], 'BetaH': [20, 30], 'Beta': [12, 30]}
@@ -151,15 +152,20 @@ channel_groups = {'Fro': ['FP1', 'FP2'], 'Cen': ['C3', 'C4'], 'Par': ['P7', 'P8'
 # 4 areas by 3 frequency bands = 12 features + 3 indices = 15 features
 
 # samples = 250*60*4  # Removing the last 1 minute of the take
-centralp = 'C:/Users/Milton/PycharmProjects/neurohumanities-lab/IEEE2026/data/csv'
+centralp = 'C:/Users/Milton/PycharmProjects/neurohumanities-lab/2026_Elsevier/raw/csv'
 fs = 250
 
 channels_bands = ['{}_{}'.format(channel, band) for channel in channels for band in freq_bands.keys()]
 groups_bands = ['{}_{}'.format(group, band) for group in channel_groups.keys() for band in freq_bands.keys()]
-df_PSD = pd.DataFrame(columns=groups_bands + ['Subject', 'Scene', 'Second'])
+
+# FOR GROUP VALUES:
+# df_PSD = pd.DataFrame(columns=groups_bands + ['Subject', 'Scene', 'Second'])
+# FOR CHANNEL VALUES:
+df_PSD = pd.DataFrame(columns=channels_bands + ['Subject', 'Scene', 'Second'])
+
 for file in os.listdir(centralp): # used_children: #   #   # os.listdir('data/EEG_Frontiers'):
     subject, scene = file[1:4], file[5:8]
-    if scene == '000':
+    if scene != '000':
         continue
     df = pd.read_csv('{}/{}'.format(centralp, file), header=None).drop(0, axis=0)
     # df = df.iloc[(fs*30):(df.shape[0]-fs*30), :]  # Removing the first minute of data
@@ -172,11 +178,13 @@ for file in os.listdir(centralp): # used_children: #   #   # os.listdir('data/EE
     for channel in channels:
         for band in freq_bands.keys():
             df_temp['{}_{}'.format(channel, band)] = calc_bands2(df[channel], band, 2)
-    df_temp = dim_reduction(df_temp, freq_bands, channel_groups)
+    # FOR GROUP VALUES:
+    # df_temp = dim_reduction(df_temp, freq_bands, channel_groups)
+
     df_temp[['Subject', 'Scene']] = [subject, scene]
     df_temp['Second'] = range(2, df_temp.shape[0]*2+1, 2)
     df_PSD = pd.concat([df_PSD, df_temp], axis=0)
     print()
 
 print(df_PSD)
-df_PSD.reset_index(drop=True).to_csv('pross/PSD_TAB.csv')
+df_PSD.reset_index(drop=True).to_csv('pross/PSD_TABC_calib.csv')

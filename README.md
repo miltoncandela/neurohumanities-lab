@@ -14,9 +14,9 @@
 - **Prior** to pre-processing DEAP dataset, they applied (1) bandpass frequency filter from 4.0-45.0 Hz, and (2) averaged to the common reference (this needs to be replicated!)
 
 ## Citation
-If you find anything in the paper or repository useful, please consider citing:
+If you find anything useful in the journal article or repository, please consider citing:
 ```
-8-Channel EEG model based on DEAP dataset:
+8-Channel EEG model based on DEAP dataset (2024_Frontiers):
 @article{BlancoRos2024,
   title = {Real-time EEG-based emotion recognition for neurohumanities: perspectives from principal component analysis and tree-based algorithms},
   volume = {18},
@@ -29,35 +29,14 @@ If you find anything in the paper or repository useful, please consider citing:
   year = {2024},
   month = mar 
 }
-
-Neurohumanities Lab enhances immersion and learning:
-@article{MelladoReyes2024,
-  author = {Mellado-Reyes, Rebeca and Ortiz, Alexandro and Vélez-Saboyá, Carol S. and Lozoya-Santos, Jorge De-J. and Ramírez-Moreno, Mauricio A. and Cebral-Loureda, Manuel},
-  title = {Neurohumanities Lab: Physiological Signal Analysis Within an Educational Partially Immersive Environment},
-  journal = {Evolutionary studies in imaginative culture},
-  volume = {8},
-  number = {2},
-  pages = {383--392},
-  doi = {https://doi.org/10.70082/esiculture.vi.2312},
-  year = {2024}
-}
-
-8-Channel Neurohumanities Lab data paper:
-@article{RomoDeLen2024,
-  title = {EEG and Physiological Signals Dataset from Participants during Traditional and Partially Immersive Learning Experiences in Humanities},
-  volume = {9},
-  ISSN = {2306-5729},
-  url = {http://dx.doi.org/10.3390/data9050068},
-  DOI = {10.3390/data9050068},
-  number = {5},
-  journal = {Data},
-  publisher = {MDPI AG},
-  author = {Romo-De León, Rebeca and Cham-Pérez, Mei Li L. and Elizondo-Villegas, Verónica Andrea and Villarreal-Villarreal, Alejandro and Ortiz-Espinoza, Alexandro Antonio and Vélez-Saboyá, Carol Stefany and Lozoya-Santos, Jorge de Jesús and Cebral-Loureda, Manuel and Ramírez-Moreno, Mauricio A.},
-  year = {2024},
-  month = may,
-  pages = {68}
-}
 ```
+
+> Blanco-Rios MA, Candela-Leal MO, Orozco-Romo C, Remis-Serna P, Velez-Saboya CS, Lozoya-Santos JJ, Cebral-Loureda M, & Ramirez-Moreno MA (2024)
+> **Real-time EEG-based Emotion Recognition for Neurohumanities: Perspectives from Principal Component Analysis and Tree-based Algorithms**
+> Frontiers in Human Neuroscience, 18, 1319574. https://doi.org/10.3389/fnhum.2024.1319574
+
+## Data
+Raw data for `2026_EDUCON` and `2026_Elsevier` is available upon reasonable request.
 
 ## Overview
 Within the field of humanities, there is a recognized lack of educational innovation, as there are currently no reported tools available that enable individuals to interact with their environment to create an enhanced learning experience in the humanities. This project proposes a solution to address this gap by integrating technology and promoting the development of teaching methodologies in the humanities, specifically through the incorporation of emotional monitoring during the learning process. 

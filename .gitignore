@@ -2,7 +2,6 @@
 /data/raw/
 /2024_Frontiers/results/df_gamma.csv
 /2024_Frontiers/results/df_PCA.csv
-/2026_EDUCON/
 /models/
 /other/
 /other/pyeeg
@@ -14,3 +13,5 @@ vad_prediction.ipynb
 /OnlineProcessing/EEG/Models
 *.pkl
 .venv
+/2026_EDUCON/raw/
+/2026_Elsevier/raw/

@@ -7,9 +7,10 @@ import pandas as pd
 channels = ['Fp1', 'Fp2', 'C3', 'C4', 'P7', 'P8', 'O1', 'O2']
 bands = ['Theta', 'Alpha', 'Beta']
 
-df = pd.read_csv('pross/PSD_TAB_QZ_norm.csv')
+df = pd.read_csv('pross/PSD_TABC_QZ_norm.csv')
 print(df.shape)
-df = df[df.Subject.isin([3, 4, 6, 9])]
+# df = df[df.Subject.isin([3, 4, 6, 9])]
+df = df[df.Subject != 1]
 print(df.shape)
 df = df.drop('Subject', axis=1)
 mdf = df.groupby('Scene').median().T
@@ -40,4 +41,4 @@ for j, band in enumerate(bands):
             axes[j][i].set_ylabel(band, rotation=90, labelpad=5, fontsize=12)
 
 cbar = fig.colorbar(axes[0][0].images[0], ax=axes, orientation='vertical', shrink=0.8, pad=0.05)
-plt.savefig('figs/power_Topoplot_zscore.png', dpi=300, bbox_inches='tight')
+plt.savefig('figs/power_Topoplot_zscore2.png', dpi=300, bbox_inches='tight')
